@@ -1470,6 +1470,15 @@ class Manager implements IManager {
 		return true;
 	}
 
+	public function getProvidersCapabilities() {
+		$capabilities = [];
+		$providers = $this->factory->getProviders();
+		foreach ($providers as $provider) {
+			$capabilities[$provider->identifier()] = $provider->getProviderCapabilities();
+		}
+		return $capabilities;
+	}
+
 	/**
 	 * @inheritdoc
 	 */
