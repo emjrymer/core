@@ -338,15 +338,18 @@ class Manager implements IManager {
 				return $shareNode->getPermissions();
 			}
 
-			// check if share node file is also a share
+			// retrieve supershare from first reshare node and get permissions
 			$userFolder = $this->rootFolder->getUserFolder($share->getSharedBy());
-			$shareFileNode = $userFolder->getById($share->getNode()->getId(), true)[0];
-			$shareFileStorage = $shareFileNode->getStorage();
-			if ($shareFileStorage->instanceOfStorage('OCA\Files_Sharing\SharedStorage')) {
-				/** @var \OCA\Files_Sharing\SharedStorage $shareFileStorage */
-				'@phan-var \OCA\Files_Sharing\SharedStorage $shareFileStorage';
-				$parentShare = $shareFileStorage->getShare();
-				$maxPermissions = $parentShare->getPermissions();
+			$shareFileNodes = $userFolder->getById($shareNode->getId(), true);
+			$shareFileNode = $shareFileNodes[0] ?? null;
+			if ($shareFileNode) {
+				$shareFileStorage = $shareFileNode->getStorage();
+				if ($shareFileStorage->instanceOfStorage('OCA\Files_Sharing\SharedStorage')) {
+					/** @var \OCA\Files_Sharing\SharedStorage $shareFileStorage */
+					'@phan-var \OCA\Files_Sharing\SharedStorage $shareFileStorage';
+					$parentShare = $shareFileStorage->getShare();
+					$maxPermissions = $parentShare->getPermissions();
+				}
 			}
 		}
 
@@ -356,7 +359,7 @@ class Manager implements IManager {
 			throw new GenericShareException($message_t, $message_t, 404);
 		}
 	}
-
+	
 	/**
 	 * Validate if the expiration date fits the system settings
 	 *
